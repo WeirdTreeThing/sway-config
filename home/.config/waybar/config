@@ -1,0 +1,66 @@
+{
+    "height": 30,
+    "spacing": 10,
+
+    "modules-left": ["sway/workspaces"],
+    "modules-center": ["sway/window"],
+    "modules-right": ["tray", "battery", "cpu", "memory", "pulseaudio", "clock"],
+
+    "tray": {
+        "spacing": 10,
+	"icon-size": 21
+    },
+
+    "sway/workspaces": {
+         "disable-scroll": true,
+         "all-outputs": false,
+         "current-only": false,
+     },
+
+     "sway/window": {
+          "icon": true
+     },
+    "clock": {
+        "format": "{:%I:%M %p}",
+        "timezone": "America/Detroit",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}"
+    },
+
+    "cpu": {
+        "format": " {usage}%",
+        "tooltip": true
+    },
+
+    "memory": {
+        "format": " {}%"
+    },
+        "battery": {
+        "interval": 60,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "max-length": 25
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon} {volume}%",
+        "format-bluetooth-muted": " ",
+        "format-muted": " ",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+}
+

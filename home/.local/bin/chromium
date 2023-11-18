@@ -1,0 +1,2 @@
+#!/bin/bash
+flatpak run --user com.github.Eloston.UngoogledChromium

@@ -1,0 +1,14 @@
+sort=-time
+layer=overlay
+background-color=#2d303bff
+width=300
+height=110
+border-size=2
+border-color=#7c838977
+icons=1
+max-icon-size=64
+font=monospace 15
+
+[category=sysinfo]
+default-timeout=1000
+anchor=center

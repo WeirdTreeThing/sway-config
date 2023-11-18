@@ -1,0 +1,61 @@
+#!/bin/bash
+
+get_vol() {
+  VOLUME="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -f 2 -d ' ' | sed 's/\.//g;s/0*//')"
+  [ -z "$VOLUME" ] && VOLUME="0"
+  echo "$VOLUME"
+}
+
+get_mute() {
+  echo "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep MUTED)"
+}
+
+clear_notifs() {
+  makoctl list | jq '.data[0][] | select (.category.data=="sysinfo").id.data' | xargs -rn 1 makoctl dismiss -n
+}
+
+send_notif() {
+  if [ -n "$LASTID" ]; then
+    echo "$(notify-send -p -c "sysinfo" -r "$LASTID" "$1")"
+  else
+    echo "$(notify-send -p -c "sysinfo" "$1")"
+  fi
+  paplay /usr/share/sounds/freedesktop/stereo/audio-volume-change.oga &
+}
+
+LOCK="${XDG_RUNTIME_DIR}/audio.lock"
+ID="${XDG_RUNTIME_DIR}/audio.id"
+SINK_NAME="$(wpctl inspect @DEFAULT_AUDIO_SINK@ | grep node.description | cut -f 2 -d '"')"
+STEP="2"
+NEWID=""
+
+[ ! -f "$LOCK" ] && touch $LOCK
+
+grep "locked" $LOCK && exit
+echo "locked" > $LOCK
+
+LASTID="$(cat $ID)"
+
+if [ "$1" = "up" ]; then
+  wpctl set-volume @DEFAULT_AUDIO_SINK@ ${STEP}%+
+  VOLUME="$(get_vol)"
+  clear_notifs
+  NEWID="$(send_notif "${SINK_NAME}: ${VOLUME}%")"
+elif [ "$1" = "down" ]; then
+  wpctl set-volume @DEFAULT_AUDIO_SINK@ ${STEP}%-
+  VOLUME="$(get_vol)"
+  clear_notifs
+  NEWID="$(send_notif "${SINK_NAME}: ${VOLUME}%")"
+elif [ "$1" = "mute" ]; then
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+  MUTE="$(get_mute)"
+  clear_notifs
+  if [ -n "$MUTE" ]; then
+    NEWID="$(send_notif "${SINK_NAME}: Muted")"
+  else
+    NEWID="$(send_notif "${SINK_NAME}: Unmuted")"
+  fi
+fi
+
+echo "$NEWID" > $ID
+echo "" > $LOCK

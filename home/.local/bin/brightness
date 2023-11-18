@@ -1,0 +1,57 @@
+#!/bin/bash
+
+display_dev="intel_backlight"
+keyboard_dev="chromeos::kbd_backlight"
+display_step="5"
+keyboard_step="20"
+
+get_brightness() {
+  BRIGHTNESS="$(brightnessctl -d $1 | grep Current | cut -f 2 -d '(' | cut -f 1 -d ')')"
+  echo "$BRIGHTNESS"
+}
+
+clear_notifs() {
+  makoctl list | jq '.data[0][] | select (.category.data=="sysinfo").id.data' | xargs -rn 1 makoctl dismiss -n
+}
+
+send_notif() {
+  if [ -n "$LASTID" ]; then
+    echo "$(notify-send -p -c "sysinfo" -r "$LASTID" "$1")"
+  else
+    echo "$(notify-send -p -c "sysinfo" "$1")"
+  fi
+}
+
+LOCK="${XDG_RUNTIME_DIR}/brightness.lock"
+ID="${XDG_RUNTIME_DIR}/brightness.id"
+NEWID=""
+
+if [  "$2" = "Display" ]; then
+  DEV=$display_dev
+  STEP=$display_step
+elif [ "$2" = "Keyboard" ]; then
+  DEV=$keyboard_dev
+  STEP=$keyboard_step
+fi
+
+[ ! -f "$LOCK" ] && touch $LOCK
+
+grep "locked" $LOCK && exit
+echo "locked" > $LOCK
+
+LASTID="$(cat $ID)"
+
+if [ "$1" = "up" ]; then
+  brightnessctl -d $DEV s ${STEP}%+
+  BRIGHTNESS="$(get_brightness $DEV)"
+  clear_notifs
+  NEWID="$(send_notif "${2}: ${BRIGHTNESS}")"
+elif [ "$1" = "down" ]; then
+  brightnessctl -d $DEV s ${STEP}%-
+  BRIGHTNESS="$(get_brightness $DEV)"
+  clear_notifs
+  NEWID="$(send_notif "${2}: ${BRIGHTNESS}")"
+fi
+
+echo "$NEWID" > $ID
+echo "" > $LOCK

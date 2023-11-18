@@ -1,0 +1,27 @@
+#!/bin/bash
+
+TITLE="Power Menu"
+
+lock=" Lock"
+exit=" Exit Sway"
+shutdown=" Poweroff"
+reboot=" Reboot"
+
+options="$lock\n$exit\n$shutdown\n$reboot"
+option="$(echo -e "$options" | rofi -dmenu -p "$TITLE" -selected-row 0)"
+echo $option
+
+case $option in
+$exit)
+  swaymsg exit
+  ;;
+$lock)
+  show-lock-screen
+  ;;
+$reboot)
+  reboot
+  ;;
+$shutdown)
+  poweroff
+  ;;
+esac
