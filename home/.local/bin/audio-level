@@ -20,7 +20,7 @@ send_notif() {
   else
     echo "$(notify-send -p -c "sysinfo" "$1")"
   fi
-  paplay /usr/share/sounds/freedesktop/stereo/audio-volume-change.oga &
+  #paplay /usr/share/sounds/freedesktop/stereo/audio-volume-change.oga &
 }
 
 LOCK="${XDG_RUNTIME_DIR}/audio.lock"
